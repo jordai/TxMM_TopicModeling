@@ -28,16 +28,24 @@ def load_data(dir_path):
                     for tweet in data:
                         tweet_id = tweet["id"]
                         tweet_date = tweet["created_at"]
+                        
                         if tweet["truncated"]:
                             tweet_text = tweet["extended_tweet"]["full_text"]
                         else:
                             tweet_text = tweet['text']
+
                         tweet_hashtags = []
                         for hashtag in tweet['entities']['hashtags']:
                             tweet_hashtags.append(hashtag['text'])
+
                         tweet_tags = []
                         for tag in tweet['entities']['user_mentions']:
                             tweet_tags.append(tag['name'])
+
                         tweet_list.append([tweet_id, tweet_date, tweet_text, tweet_hashtags, tweet_tags])
     tweets = pd.DataFrame(data=tweet_list, columns=["id", "date", "tweet", "hashtags", "tags"])
+    if preprocess:
+        preprocess(tweets)
     return tweets
+
+    def preprocess(text):
