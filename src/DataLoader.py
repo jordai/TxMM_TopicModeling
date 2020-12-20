@@ -3,6 +3,10 @@ import json
 import shutil
 import re
 import pandas as pd
+from nltk import download, FreqDist
+from nltk.tokenize import TweetTokenizer
+from nltk import ngrams
+from nltk.corpus import stopwords
 
 def fix_json(dir_path):
     i = 0
@@ -69,10 +73,19 @@ def clean_data(tweets):
     tweets = tweets[tweets.to_keep]
     print("Dataset size after cleanup: {}".format(tweets.shape))
 
-    return tweets
+    return tweets.drop(['is_retweet','is_duplicate','to_keep'], axis = 1)
 
 def preprocess(tweets):
-    return NotImplementedError
+    tokenizer = TweetTokenizer(preserve_case=False, reduce_len=True, strip_handles= False)
+    tweets['tokenized_tweet'] = tweets['tweet'].apply(tokenizer.tokenize)
+    #print(tweets['tokenized_tweet'].head())
+    # Links? @ en #?
+    # Spam accounts?
+    
+    # Remove Stopwords
+    stop = set(stopwords.words('dutch'))
+    tweets['tokenized_tweet'] = tweets['tokenized_tweet'].apply(lambda x: [word for word in x if word not in stop])
+    return tweets
 
 def isRetweet(string):
     return bool(re.search("^RT ", string))

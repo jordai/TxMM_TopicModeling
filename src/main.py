@@ -10,7 +10,9 @@ def main():
     tweets = load_data(data_path)
 
     tweets = clean_data(tweets)
-    
+
+    tweets = preprocess(tweets)
+    tweets.to_csv('preprocessed_tweets.csv')
 
 if __name__ == '__main__':
     main()

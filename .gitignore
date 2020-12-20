@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Ignore preprocessed data:
+preprocessed_tweets.csv
+
 # Ignore data:
 data/
 
