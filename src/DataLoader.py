@@ -1,6 +1,7 @@
 import os
 import json
 import shutil
+import re
 import pandas as pd
 
 def fix_json(dir_path):
@@ -27,8 +28,9 @@ def load_data(dir_path):
                     data = json.load(f)
                     for tweet in data:
                         tweet_id = tweet["id"]
+                        username = tweet["user"]["screen_name"]
                         tweet_date = tweet["created_at"]
-                        
+
                         if tweet["truncated"]:
                             tweet_text = tweet["extended_tweet"]["full_text"]
                         else:
@@ -42,10 +44,38 @@ def load_data(dir_path):
                         for tag in tweet['entities']['user_mentions']:
                             tweet_tags.append(tag['name'])
 
-                        tweet_list.append([tweet_id, tweet_date, tweet_text, tweet_hashtags, tweet_tags])
-    tweets = pd.DataFrame(data=tweet_list, columns=["id", "date", "tweet", "hashtags", "tags"])
-    if preprocess:
-        preprocess(tweets)
+                        tweet_list.append([tweet_id, username, tweet_date, tweet_text, tweet_hashtags, tweet_tags])
+    tweets = pd.DataFrame(data=tweet_list, columns=["id", "username", "date", "tweet", "hashtags", "tags"])
     return tweets
 
-    def preprocess(text):
+def clean_data(tweets):
+    print("Size of dataset before cleaning: {}".format(tweets.shape))
+
+    # Find Retweets
+    tweets['is_retweet'] = tweets.tweet.apply(isRetweet)
+    print("Amount of retweets: {}".format( sum(tweets.is_retweet)  ))
+
+    # Find Duplicates
+    tweets['is_duplicate'] = tweets.duplicated(subset='tweet',keep='first')
+    print("Amount of duplicates: {}".format( sum(tweets.is_duplicate) ))
+
+    tweets['to_keep'] = ~ (tweets.is_retweet | tweets.is_duplicate)
+
+    # Count most frequent usernames:
+    counts = tweets.username.value_counts()
+    #print(counts.nlargest(20))
+
+    # Delete RTs, duplicates:
+    tweets = tweets[tweets.to_keep]
+    print("Dataset size after cleanup: {}".format(tweets.shape))
+
+    return tweets
+
+def preprocess(tweets):
+    return NotImplementedError
+
+def isRetweet(string):
+    return bool(re.search("^RT ", string))
+
+
+    
