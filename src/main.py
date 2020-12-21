@@ -12,7 +12,7 @@ def main():
     tweets = clean_data(tweets)
 
     tweets = preprocess(tweets)
-    tweets.to_csv('preprocessed_tweets.csv')
+    tweets.to_csv('preprocessed_tweets.csv', index = False)
 
 if __name__ == '__main__':
     main()

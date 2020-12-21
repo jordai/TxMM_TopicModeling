@@ -71,12 +71,17 @@ def clean_data(tweets):
 
     # Delete RTs, duplicates:
     tweets = tweets[tweets.to_keep]
+
+    tweets.tweet = tweets.tweet.map(replace_username)
+    tweets.tweet = tweets.tweet.map(replace_hashtag)
+    tweets.tweet = tweets.tweet.map(replace_link)
+    tweets.tweet = tweets.tweet.map(exclude_emojis)
     print("Dataset size after cleanup: {}".format(tweets.shape))
 
     return tweets.drop(['is_retweet','is_duplicate','to_keep'], axis = 1)
 
 def preprocess(tweets):
-    tokenizer = TweetTokenizer(preserve_case=False, reduce_len=True, strip_handles= False)
+    tokenizer = TweetTokenizer(preserve_case=True, reduce_len=True, strip_handles= False)
     tweets['tokenized_tweet'] = tweets['tweet'].apply(tokenizer.tokenize)
     #print(tweets['tokenized_tweet'].head())
     # Links? @ en #?
@@ -84,11 +89,23 @@ def preprocess(tweets):
     
     # Remove Stopwords
     stop = set(stopwords.words('dutch'))
-    tweets['tokenized_tweet'] = tweets['tokenized_tweet'].apply(lambda x: [word for word in x if word not in stop])
+    stop.update(["HASHTAG", "USERNAME", "LINK"])
+    tweets['tokenized_tweet'] = tweets['tokenized_tweet'].apply(lambda x: [word.lower() for word in x if word not in stop])
     return tweets
 
 def isRetweet(string):
     return bool(re.search("^RT ", string))
 
 
+def replace_username(string):
+    return re.sub('@(\w){1,15}','USERNAME',string)
+
+def replace_hashtag(string):
+    return re.sub('#(\w)*','HASHTAG',string)
+
+def replace_link(string):
+    return re.sub('(https:)?//t.co/\w*', 'LINK',string)
+
+def exclude_emojis(string):
+    return re.sub('\W', ' ', string)
     
