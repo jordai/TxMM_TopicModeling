@@ -88,9 +88,12 @@ def preprocess(tweets):
     # Spam accounts?
     
     # Remove Stopwords
-    stop = set(stopwords.words('dutch'))
-    stop.update(["HASHTAG", "USERNAME", "LINK"])
-    tweets['tokenized_tweet'] = tweets['tokenized_tweet'].apply(lambda x: [word.lower() for word in x if word not in stop])
+    stoplist = stopwords.words('dutch')
+    stoplist.append('HASHTAG')
+    stoplist.append('LINK')
+    stoplist.append('HASHTAG')
+    stop = set(stoplist)
+    tweets['tokenized_tweet'] = tweets['tokenized_tweet'].apply(lambda x: [word.lower() for word in x if word.lower() not in stop and len(word)>2])
     return tweets
 
 def isRetweet(string):
