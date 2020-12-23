@@ -89,9 +89,9 @@ def preprocess(tweets):
     
     # Remove Stopwords
     stoplist = stopwords.words('dutch')
-    stoplist.append('HASHTAG')
-    stoplist.append('LINK')
-    stoplist.append('HASHTAG')
+    stoplist.append('hashtag')
+    stoplist.append('link')
+    stoplist.append('username')
     stop = set(stoplist)
     tweets['tokenized_tweet'] = tweets['tokenized_tweet'].apply(lambda x: [word.lower() for word in x if word.lower() not in stop and len(word)>2])
     return tweets
