@@ -52,7 +52,7 @@ def load_data(dir_path):
     tweets = pd.DataFrame(data=tweet_list, columns=["id", "username", "date", "tweet", "hashtags", "tags"])
     return tweets
 
-def clean_data(tweets):
+def clean_data(tweets, spam_threshold = 200):
     print("Size of dataset before cleaning: {}".format(tweets.shape))
 
     # Find Retweets
@@ -63,13 +63,15 @@ def clean_data(tweets):
     tweets['is_duplicate'] = tweets.duplicated(subset='tweet',keep='first')
     print("Amount of duplicates: {}".format( sum(tweets.is_duplicate) ))
 
-    tweets['to_keep'] = ~ (tweets.is_retweet | tweets.is_duplicate)
-
-    # Count most frequent usernames:
+    # Find Spam accounts:
     counts = tweets.username.value_counts()
-    #print(counts.nlargest(20))
+    counts = counts[counts > spam_threshold]
+    counts_list = list(counts.to_dict())
+    tweets['is_from_spammer'] = tweets['username'].isin(counts_list)
+    print("Amount of spam tweets: {}, tweeted by {} accounts".format( sum(tweets.is_from_spammer), len(counts_list) ))
 
     # Delete RTs, duplicates:
+    tweets['to_keep'] = ~ (tweets.is_retweet | tweets.is_duplicate | tweets.is_from_spammer)
     tweets = tweets[tweets.to_keep]
 
     tweets.tweet = tweets.tweet.map(replace_username)
@@ -78,27 +80,28 @@ def clean_data(tweets):
     tweets.tweet = tweets.tweet.map(exclude_emojis)
     print("Dataset size after cleanup: {}".format(tweets.shape))
 
-    return tweets.drop(['is_retweet','is_duplicate','to_keep'], axis = 1)
+    return tweets.drop(['is_retweet','is_duplicate','is_from_spammer','to_keep'], axis = 1)
 
 def preprocess(tweets):
     tokenizer = TweetTokenizer(preserve_case=True, reduce_len=True, strip_handles= False)
     tweets['tokenized_tweet'] = tweets['tweet'].apply(tokenizer.tokenize)
-    #print(tweets['tokenized_tweet'].head())
-    # Links? @ en #?
-    # Spam accounts?
     
-    # Remove Stopwords
-    stoplist = stopwords.words('dutch')
-    stoplist.append('hashtag')
-    stoplist.append('link')
-    stoplist.append('username')
-    stop = set(stoplist)
+    # Dutch Stopwords
+    nl_stoplist = stopwords.words('dutch')
+    nl_stoplist.append('hashtag')
+    nl_stoplist.append('link')
+    nl_stoplist.append('username')
+
+    # English stopwords
+    en_stoplist = stopwords.words('english')
+    en_stoplist.remove("who")
+
+    stop = set( en_stoplist + nl_stoplist )
     tweets['tokenized_tweet'] = tweets['tokenized_tweet'].apply(lambda x: [word.lower() for word in x if word.lower() not in stop and len(word)>2])
     return tweets
 
 def isRetweet(string):
     return bool(re.search("^RT ", string))
-
 
 def replace_username(string):
     return re.sub('@(\w){1,15}','USERNAME',string)

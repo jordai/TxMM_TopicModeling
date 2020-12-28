@@ -24,7 +24,7 @@ def computeCoherence(tweets):
     # compute coherence
     tweets_coherence = []
     for nb_topics in range(1,25):
-        print(nb_topics)
+        print("calculating coherence for {} topics".format(nb_topics))
         lda = LdaModel(tweets_corpus, num_topics = nb_topics, id2word = tweets_dictionary, passes=10)
         cohm = CoherenceModel(model=lda, corpus=tweets_corpus, dictionary=tweets_dictionary, coherence='u_mass')
         coh = cohm.get_coherence()

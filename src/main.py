@@ -20,12 +20,12 @@ def main():
 
     freqlist = getWordFreq(tweets)
     print(freqlist.most_common(10))
-    #tweet_coherence = computeCoherence(tweets)
-    #plotCoherence(tweet_coherence)
+    tweet_coherence = computeCoherence(tweets)
+    plotCoherence(tweet_coherence)
     for k in range(1,10):
+        print("performing LDA with {} topics".format(k))
         tweets_lda = LDA(tweets, k)
         plot_top_words(tweets_lda, k=k)
-
 
 
 if __name__ == '__main__':
