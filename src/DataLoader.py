@@ -33,8 +33,16 @@ def load_data(dir_path):
                     for tweet in data:
                         tweet_id = tweet["id"]
                         username = tweet["user"]["screen_name"]
-                        tweet_date = tweet["created_at"]
 
+                        # Extracting month + day
+                        date_regex = '[a-zA-Z]{3}\s+[0-9]{2}'
+                        date = re.search(date_regex, tweet["created_at"])
+                        if date is not None:
+                            tweet_date = date[0]
+                            month = date[0][0:3]
+                            day = int(date[0][-2:])
+                        # else:
+                        #     tweet_date = ""
                         if tweet["truncated"]:
                             tweet_text = tweet["extended_tweet"]["full_text"]
                         else:
@@ -48,8 +56,10 @@ def load_data(dir_path):
                         for tag in tweet['entities']['user_mentions']:
                             tweet_tags.append(tag['name'])
 
-                        tweet_list.append([tweet_id, username, tweet_date, tweet_text, tweet_hashtags, tweet_tags])
-    tweets = pd.DataFrame(data=tweet_list, columns=["id", "username", "date", "tweet", "hashtags", "tags"])
+                        tweet_list.append([tweet_id, month, day,  username, tweet_date, tweet_text, tweet_hashtags, tweet_tags])
+    tweets = pd.DataFrame(data=tweet_list, columns=["id","month", "day", "username", "date", "tweet", "hashtags", "tags"])
+    tweets['month'] = pd.Categorical(tweets['month'], ["Feb", "Mar", "Apr", "May"])
+    tweets.sort_values(["month", "day"], ascending = [True, True], inplace=True)
     return tweets
 
 def clean_data(tweets, spam_threshold = 200):

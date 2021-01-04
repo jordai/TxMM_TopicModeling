@@ -4,6 +4,7 @@ from multiprocessing import Pool, cpu_count
 from gensim.corpora import Dictionary
 from gensim.models.ldamodel import LdaModel
 from gensim.models import CoherenceModel
+from gensim.models import ldaseqmodel
 
 def getWordFreq(tweets):
     pool = Pool(cpu_count())
@@ -35,4 +36,8 @@ def LDA(tweets, k = 1):
     tweets_dictionary = Dictionary(tweets.tokenized_tweet)
     tweets_corpus = [tweets_dictionary.doc2bow(tweet) for tweet in tweets.tokenized_tweet]
     return LdaModel(tweets_corpus, num_topics = k, id2word = tweets_dictionary, passes=10)
-    
+
+def LDA_OT(lda, tweets, time_slices, k = 1):
+    tweets_dictionary = Dictionary(tweets.tokenized_tweet)
+    tweets_corpus = [tweets_dictionary.doc2bow(tweet) for tweet in tweets.tokenized_tweet]
+    return ldaseqmodel.LdaSeqModel(lda_model = lda, corpus=tweets_corpus, id2word=tweets_dictionary, time_slice=time_slices, num_topics=k)
