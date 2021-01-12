@@ -25,3 +25,18 @@ def plot_top_words(lda, k, nb_words=10):
         ax.set_yticklabels(top_words[i][:nb_words])
         plt.title("Topic "+str(i))
     plt.savefig('LDA_output_with_{}_topics.png'.format(k))
+
+
+def plot_tweets_per_day(dates, tweets_per_day):
+    
+    plt.xticks(rotation = 90)
+    plt.plot(dates, tweets_per_day)
+    plt.title("Tweets Per Day related to COVID-19")
+    plt.ylabel("Tweet Count")
+    plt.savefig('tweets_per_day.png')
+
+def plot_results(tot):
+    tot = tot.drop(['sum'], axis = 1)
+    plt.figure
+    tot.plot(x = 'date')
+    plt.savefig('test_result_plot.png')
