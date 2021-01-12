@@ -9,6 +9,10 @@ output/
 # Ignore preprocessed data:
 preprocessed_tweets.csv
 
+# Ignore LDA model
+tweets
+lda_over_time
+
 # Ignore data:
 data/
 
