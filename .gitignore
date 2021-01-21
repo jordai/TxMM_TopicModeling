@@ -9,6 +9,7 @@ output/
 # Ignore preprocessed data:
 preprocessed_tweets.csv
 tweets_with_topics.csv
+tot.csv
 
 # Ignore LDA model
 tweets

@@ -101,11 +101,13 @@ def preprocess(tweets):
     nl_stoplist.append('hashtag')
     nl_stoplist.append('link')
     nl_stoplist.append('username')
-
+    nl_stoplist.append('corona')
+    nl_stoplist.append('covid')
+    nl_stoplist.append('coronavirus')
     # English stopwords
     en_stoplist = stopwords.words('english')
     en_stoplist.remove("who")
-
+    
     stop = set( en_stoplist + nl_stoplist )
     tweets['tokenized_tweet'] = tweets['tokenized_tweet'].apply(lambda x: [word.lower() for word in x if word.lower() not in stop and len(word)>2])
     return tweets

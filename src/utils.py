@@ -14,7 +14,7 @@ def plot_top_words(lda, k, nb_words=10):
     top_words = [[word for word,_ in lda.show_topic(topic_id, topn=50)] for topic_id in range(lda.num_topics)]
     top_betas = [[beta for _,beta in lda.show_topic(topic_id, topn=50)] for topic_id in range(lda.num_topics)]
 
-    gs  = gridspec.GridSpec(round(math.sqrt(k))+1,round(math.sqrt(k))+1)
+    gs  = gridspec.GridSpec(ncols=4, nrows=3)
     gs.update(wspace=0.5, hspace=0.5)
     plt.figure(figsize=(20,15))
     for i in range(k):
@@ -39,4 +39,6 @@ def plot_results(tot):
     tot = tot.drop(['sum'], axis = 1)
     plt.figure
     tot.plot(x = 'date')
+    plt.title('Topic Weight Evolution over Time')
+    plt.ylabel('Mean Topic Weight')
     plt.savefig('test_result_plot.png')

@@ -16,7 +16,7 @@ def getWordFreq(tweets):
         word_dist.update(dist)
     return word_dist
 
-def computeCoherence(tweets):
+def computeCoherence(tweets, k = 25):
     tweets_dictionary = Dictionary(tweets.tokenized_tweet)
 
     # build the corpus i.e. vectors with the number of occurence of each word per tweet
@@ -24,7 +24,7 @@ def computeCoherence(tweets):
 
     # compute coherence
     tweets_coherence = []
-    for nb_topics in range(1,25):
+    for nb_topics in range(1,k):
         print("calculating coherence for {} topics".format(nb_topics))
         lda = LdaModel(tweets_corpus, num_topics = nb_topics, id2word = tweets_dictionary, passes=10)
         cohm = CoherenceModel(model=lda, corpus=tweets_corpus, dictionary=tweets_dictionary, coherence='u_mass')
@@ -67,9 +67,29 @@ def assign_topics_to_tweets(tweets, tweets_lda):
     tweets['topic_1'] = topic_1
     tweets['topic_2'] = topic_2
     tweets['topic_3'] = topic_3
-    return tweets#tweets_lda.get_document_topics(bow)
+    return tweets
     
-def LDA_OT(lda, tweets, time_slices, k = 1):
-    tweets_dictionary = Dictionary(tweets.tokenized_tweet)
-    tweets_corpus = [tweets_dictionary.doc2bow(tweet) for tweet in tweets.tokenized_tweet]
-    return ldaseqmodel.LdaSeqModel(lda_model = lda, corpus=tweets_corpus, id2word=tweets_dictionary, time_slice=time_slices, num_topics=k)
+def perform_tot(tweets_with_topics):
+    dates = tweets_with_topics.date.unique()
+    tweets_per_day = tweets_with_topics.date.value_counts(sort = False)
+    ordered_tweets_per_day = []
+    for day in dates:
+        ordered_tweets_per_day.append(tweets_per_day[day])
+
+    topic_0 = []
+    topic_1 = []
+    topic_2 = []
+    topic_3 = []
+
+    topic_over_time = []
+    for date in dates:
+        topic_0 = tweets_with_topics.loc[tweets_with_topics['date'] == date, 'topic_0'].mean()
+        topic_1 = tweets_with_topics.loc[tweets_with_topics['date'] == date, 'topic_1'].mean()
+        topic_2 = tweets_with_topics.loc[tweets_with_topics['date'] == date, 'topic_2'].mean()
+        topic_3 = tweets_with_topics.loc[tweets_with_topics['date'] == date, 'topic_3'].mean()
+        sanity_check = topic_0 + topic_1 + topic_2 + topic_3
+        topic_over_time.append([date, topic_0, topic_1, topic_2, topic_3, sanity_check])
+
+    tot = pd.DataFrame(topic_over_time, columns=['date', 'topic_0', 'topic_1', 'topic_2', 'topic_3', 'sum'])
+    tot.to_csv('tot.csv', index = False)
+    return tot
